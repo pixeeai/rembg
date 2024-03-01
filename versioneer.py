@@ -287,6 +287,7 @@ import re
 import subprocess
 import sys
 from typing import Callable, Dict
+from security import safe_command
 
 
 class VersioneerConfig:
@@ -392,8 +393,7 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
         try:
             dispcmd = str([command] + args)
             # remember shell=False, so use git.cmd on windows, not just git
-            process = subprocess.Popen(
-                [command] + args,
+            process = safe_command.run(subprocess.Popen, [command] + args,
                 cwd=cwd,
                 env=env,
                 stdout=subprocess.PIPE,
@@ -1318,7 +1318,7 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
         files.append(ipy)
     try:
         my_path = __file__
-        if my_path.endswith(".pyc") or my_path.endswith(".pyo"):
+        if my_path.endswith((".pyc", ".pyo")):
             my_path = os.path.splitext(my_path)[0] + ".py"
         versioneer_file = os.path.relpath(my_path)
     except NameError:
